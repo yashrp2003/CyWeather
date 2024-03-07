@@ -19,7 +19,7 @@ class SplashViewModel @Inject constructor(
     val startDestination: State<String> = _startDestination
 
     init {
-        _startDestination.value = Screen.Home.route
+        _startDestination.value = com.syclone.info.presentation.util.Screen.Home.route
         _isLoading.value = false
 
 
