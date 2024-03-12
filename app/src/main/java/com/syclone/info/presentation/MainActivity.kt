@@ -58,6 +58,7 @@ import com.google.android.gms.location.LocationServices
 
 
 
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -124,6 +125,12 @@ class MainActivity : ComponentActivity() {
                     val longitude = location.longitude
                     Log.d(TAG, "Latitude: $latitude, Longitude: $longitude")
                     // You can use latitude and longitude here
+                    val postalCode = getPostalCodeFromLocation(latitude, longitude)
+                    if (postalCode != null) {
+                        Log.d(TAG, "PostalCode: $postalCode")
+                    } else {
+                        Log.e(TAG, "Postal code not found")
+                    }
                 } else {
                     Log.e(TAG, "Unable to fetch location")
                 }
@@ -146,6 +153,21 @@ class MainActivity : ComponentActivity() {
                 Log.e(TAG, "Location permission denied")
             }
         }
+    }
+
+    private fun getPostalCodeFromLocation(latitude: Double, longitude: Double): String? {
+        val geocoder = Geocoder(this)
+        try {
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            if (addresses != null) {
+                if (addresses.isNotEmpty()) {
+                    return addresses[0].postalCode
+                }
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "Error getting postal code: ${e.message}")
+        }
+        return null
     }
 
     companion object {
