@@ -1,6 +1,7 @@
 package com.syclone.info.presentation
 
 import android.Manifest
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -14,6 +15,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat.getCurrentLocation
+import androidx.core.location.LocationManagerCompat.requestLocationUpdates
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -54,9 +57,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.io.IOException
 import javax.inject.Inject
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-
-
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.gms.tasks.OnTokenCanceledListener
 
 
 @AndroidEntryPoint
@@ -66,8 +72,6 @@ class MainActivity : ComponentActivity() {
     lateinit var splashViewModel: SplashViewModel
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().setKeepOnScreenCondition {
@@ -99,80 +103,43 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        val locationPermissionRequest = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+                when {
+                    permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                    }
+                    permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                    } else -> {
+                }
+            }
+        }
+        locationPermissionRequest.launch(arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION))
 
-        if (ContextCompat.checkSelfPermission(
+        if (ActivityCompat.checkSelfPermission(
                 this,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                PERMISSIONS_REQUEST_LOCATION
-            )
-        } else {
-            requestLocation()
+
+            return
         }
-    }
-    @SuppressLint("MissingPermission")
-    private fun requestLocation() {
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location ->
-                if (location != null) {
+        fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
+            .addOnSuccessListener { location: Location? ->
+                if (location == null)
+                    Toast.makeText(this, "Cannot get location.", Toast.LENGTH_SHORT).show()
+                else {
                     val latitude = location.latitude
                     val longitude = location.longitude
-                    Log.d(TAG, "Latitude: $latitude, Longitude: $longitude")
-                    // You can use latitude and longitude here
-                    val postalCode = getPostalCodeFromLocation(latitude, longitude)
-                    if (postalCode != null) {
-                        Log.d(TAG, "PostalCode: $postalCode")
-                    } else {
-                        Log.e(TAG, "Postal code not found")
-                    }
-                } else {
-                    Log.e(TAG, "Unable to fetch location")
+                    Log.d("Loc", "Latitude: $latitude, Longitude: $longitude")
                 }
             }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error getting location: ${e.message}")
-            }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSIONS_REQUEST_LOCATION) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                requestLocation()
-            } else {
-                Log.e(TAG, "Location permission denied")
-            }
-        }
-    }
-
-    private fun getPostalCodeFromLocation(latitude: Double, longitude: Double): String? {
-        val geocoder = Geocoder(this)
-        try {
-            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-            if (addresses != null) {
-                if (addresses.isNotEmpty()) {
-                    return addresses[0].postalCode
-                }
-            }
-        } catch (e: IOException) {
-            Log.e(TAG, "Error getting postal code: ${e.message}")
-        }
-        return null
-    }
-
-    companion object {
-        private const val PERMISSIONS_REQUEST_LOCATION = 100
-        private const val TAG = "MainActivity"
     }
 }
 
