@@ -72,7 +72,12 @@ class MainActivity : ComponentActivity() {
     lateinit var splashViewModel: SplashViewModel
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    companion object {
+        private const val REQUEST_CODE_LOCATION_PERMISSION = 100
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         installSplashScreen().setKeepOnScreenCondition {
             splashViewModel.isLoading.value
@@ -119,7 +124,7 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION))
 
-        if (ActivityCompat.checkSelfPermission(
+        /*if (ActivityCompat.checkSelfPermission(
                 this,
                 ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
@@ -139,7 +144,39 @@ class MainActivity : ComponentActivity() {
                     val longitude = location.longitude
                     Log.d("Loc", "Latitude: $latitude, Longitude: $longitude")
                 }
-            }
+            }*/
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Permissions not granted, request them
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
+                REQUEST_CODE_LOCATION_PERMISSION
+            )
+        } else {
+            // Permissions granted, get the current location
+            fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener { location: Location? ->
+                    if (location == null) {
+                        Toast.makeText(this, "Cannot get location.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val latitude = location.latitude
+                        val longitude = location.longitude
+                        Log.d("Loc", "Latitude: $latitude, Longitude: $longitude")
+                    }
+                }
+        }
+
     }
 }
 
