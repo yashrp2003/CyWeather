@@ -59,7 +59,6 @@ fun Home() {
             }
             // Load the desired URL
             val url = "https://syclone.info/SWLB-Eeye"
-            //val url = "https://whatismyipaddress.com/"
             loadUrl(url)
         }
     }, modifier = Modifier.fillMaxSize())

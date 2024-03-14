@@ -19,7 +19,7 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        Log.i(TAG, "new FCM token created: $token")
+        Log.i(TAG, "New FCM token created: $token")
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         initNotificationChannel(notificationManager)
     }
