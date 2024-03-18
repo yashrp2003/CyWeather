@@ -118,40 +118,10 @@ class MainActivity : ComponentActivity() {
         ) { permissions ->
                 when {
                     permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                        fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
-                            .addOnSuccessListener { location: Location? ->
-                                if (location == null) {
-                                    Toast.makeText(this, "Cannot get location.", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    val latitude = location.latitude
-                                    val longitude = location.longitude
-                                    Log.d("Loc", "Latitude: $latitude, Longitude: $longitude")
-
-                                    val url = "https://www.accuweather.com/ajax-service/selectLatLon?lat=$latitude&lon=$longitude&unit=F&lang=en&partner=web_syclonetec_logicom_adc"
-                                    // Load the URL using Chrome Custom Tabs
-                                    Log.d("LocationActivity", "URL: $url")
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                                    startActivity(intent)
-                                }
-                            }
+                        getLocationAndOpenUrl()
                     }
                     permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                        fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
-                            .addOnSuccessListener { location: Location? ->
-                                if (location == null) {
-                                    Toast.makeText(this, "Cannot get location.", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    val latitude = location.latitude
-                                    val longitude = location.longitude
-                                    Log.d("Loc", "Latitude: $latitude, Longitude: $longitude")
-
-                                    val url = "https://www.accuweather.com/ajax-service/selectLatLon?lat=$latitude&lon=$longitude&unit=F&lang=en&partner=web_syclonetec_logicom_adc"
-                                    // Load the URL using Chrome Custom Tabs
-                                    Log.d("LocationActivity", "URL: $url")
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                                    startActivity(intent)
-                                }
-                            }
+                        getLocationAndOpenUrl()
                     } else -> {
                 }
             }
@@ -159,46 +129,35 @@ class MainActivity : ComponentActivity() {
         locationPermissionRequest.launch(arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION))
+    }
 
-
+    private fun getLocationAndOpenUrl() {
         if (ActivityCompat.checkSelfPermission(
                 this,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // Permissions not granted, request them
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ),
-                REQUEST_CODE_LOCATION_PERMISSION
-            )
-
-        } else {
-            // Permissions granted, get the current location
-            fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
-                .addOnSuccessListener { location: Location? ->
-                    if (location == null) {
-                        Toast.makeText(this, "Cannot get location.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        val latitude = location.latitude
-                        val longitude = location.longitude
-                        Log.d("Loc", "Latitude: $latitude, Longitude: $longitude")
-
-                        val url = "https://www.accuweather.com/ajax-service/selectLatLon?lat=$latitude&lon=$longitude&unit=F&lang=en&partner=web_syclonetec_logicom_adc"
-                        // Load the URL using Chrome Custom Tabs
-                        Log.d("LocationActivity", "URL: $url")
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                        startActivity(intent)
-                    }
-                }
+            return
         }
+        fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
+            .addOnSuccessListener { location: Location? ->
+                if (location == null) {
+                    Toast.makeText(this, "Cannot get location.", Toast.LENGTH_SHORT).show()
+                } else {
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+                    Log.d("Loc", "Latitude: $latitude, Longitude: $longitude")
 
+                    val url = "https://www.accuweather.com/ajax-service/selectLatLon?lat=$latitude&lon=$longitude&unit=F&lang=en&partner=web_syclonetec_logicom_adc"
+                    // Load the URL using Chrome Custom Tabs
+                    Log.d("LocationActivity", "URL: $url")
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    startActivity(intent)
+                }
+            }
     }
 }
 
