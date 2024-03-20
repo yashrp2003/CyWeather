@@ -3,6 +3,7 @@ package com.syclone.info.presentation
 import android.Manifest
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -76,6 +77,8 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    private var isUrlOpened = false
+
     companion object {
         private const val REQUEST_CODE_LOCATION_PERMISSION = 100
     }
@@ -112,7 +115,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        /*fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
@@ -123,13 +126,50 @@ class MainActivity : ComponentActivity() {
                     permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
                         getLocationAndOpenUrl()
                     } else -> {
+                        requestPermission()
+                    }
+            }
+        }
+        locationPermissionRequest.launch(arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION))*/
+        requestPermission()
+
+
+    }
+
+    private fun requestPermission() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        val locationPermissionRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            when {
+                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                    getLocationAndOpenUrl()
+                }
+                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                    getLocationAndOpenUrl()
+                }
+                else -> {
+                    val builder = AlertDialog.Builder(this)
+                    builder.setTitle("Location Access Required")
+                    builder.setMessage("This app requires access to your location to provide accurate weather information. Please grant location permission.")
+                    builder.setPositiveButton("Grant Permission") { dialog, which ->
+                        /*Toast.makeText(this, "Callback.", Toast.LENGTH_SHORT).show()*/
+                        //getLocationAndOpenUrl()
+                    }
+                    builder.setNegativeButton("Exit App") { dialog, which ->
+                        finish()
+                    }
+                    builder.setCancelable(false)
+                    builder.show()
                 }
             }
         }
         locationPermissionRequest.launch(arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION))
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ))
     }
+
 
     private fun getLocationAndOpenUrl() {
         if (ActivityCompat.checkSelfPermission(
@@ -156,6 +196,7 @@ class MainActivity : ComponentActivity() {
                     Log.d("LocationActivity", "URL: $url")
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                     startActivity(intent)
+                    finish()
                 }
             }
     }
