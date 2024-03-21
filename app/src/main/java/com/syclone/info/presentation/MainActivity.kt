@@ -66,7 +66,8 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
-
+import android.content.res.Configuration
+import com.google.android.gms.location.Priority
 
 
 @AndroidEntryPoint
@@ -77,7 +78,9 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private var isUrlOpened = false
+
+    private var isPermissionRequested = false
+
 
     companion object {
         private const val REQUEST_CODE_LOCATION_PERMISSION = 100
@@ -115,27 +118,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        /*fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        val locationPermissionRequest = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-                when {
-                    permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                        getLocationAndOpenUrl()
-                    }
-                    permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                        getLocationAndOpenUrl()
-                    } else -> {
-                        requestPermission()
-                    }
-            }
-        }
-        locationPermissionRequest.launch(arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION))*/
         requestPermission()
-
-
+    }
+    private fun getDeviceLocale(context: Context): java.util.Locale? {
+        return context.resources.configuration.locales[0]
     }
 
     private fun requestPermission() {
@@ -153,8 +139,14 @@ class MainActivity : ComponentActivity() {
                     builder.setTitle("Location Access Required")
                     builder.setMessage("This app requires access to your location to provide accurate weather information. Please grant location permission.")
                     builder.setPositiveButton("Grant Permission") { dialog, which ->
-                        /*Toast.makeText(this, "Callback.", Toast.LENGTH_SHORT).show()*/
-                        //getLocationAndOpenUrl()
+                        ActivityCompat.requestPermissions(
+                            this@MainActivity,
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            ),
+                            REQUEST_CODE_LOCATION_PERMISSION
+                        )
                     }
                     builder.setNegativeButton("Exit App") { dialog, which ->
                         finish()
@@ -170,35 +162,60 @@ class MainActivity : ComponentActivity() {
         ))
     }
 
-
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_LOCATION_PERMISSION) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, proceed with getting location and opening URL
+                getLocationAndOpenUrl()
+            } else {
+                // Permission denied, handle it accordingly
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
     private fun getLocationAndOpenUrl() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
+        if (!isPermissionRequested &&
+            (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(
+                        this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED))
+        {
             return
         }
-        fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
-            .addOnSuccessListener { location: Location? ->
-                if (location == null) {
-                    Toast.makeText(this, "Cannot get location.", Toast.LENGTH_SHORT).show()
-                } else {
-                    val latitude = location.latitude
-                    val longitude = location.longitude
-                    Log.d("Loc", "Latitude: $latitude, Longitude: $longitude")
+        else {
+            val locationRequest = LocationRequest.Builder(1000L)
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                .build()
 
-                    val url = "https://www.accuweather.com/ajax-service/selectLatLon?lat=$latitude&lon=$longitude&unit=F&lang=en&partner=web_syclonetec_logicom_adc"
-                    // Load the URL using Chrome Custom Tabs
-                    Log.d("LocationActivity", "URL: $url")
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                    startActivity(intent)
-                    finish()
+            fusedLocationClient.requestLocationUpdates(locationRequest, object : LocationCallback() {
+                override fun onLocationResult(locationResult: LocationResult) {
+                    super.onLocationResult(locationResult)
+                    fusedLocationClient.removeLocationUpdates(this)
+
+                    val location = locationResult.lastLocation
+
+                    if (location == null) {
+                        Toast.makeText(this@MainActivity, "Cannot get location.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val latitude = location.latitude
+                        val longitude = location.longitude
+                        Log.d("Loc", "Latitude: $latitude, Longitude: $longitude")
+                        val locale = getDeviceLocale(this@MainActivity)
+                        val lan = locale?.language
+                        val url =
+                            "https://www.accuweather.com/ajax-service/selectLatLon?lat=$latitude&lon=$longitude&unit=C&lang=$lan&partner=web_syclonetec_logicom_adc"
+
+                        Log.d("LocationActivity", "URL: $url")
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        startActivity(intent)
+                        finish()
+                    }
                 }
-            }
+            }, null)
+        }
     }
 }
 
