@@ -67,7 +67,17 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
 import android.content.res.Configuration
+import android.telecom.Call
+import com.android.volley.Request
+import com.android.volley.Response
 import com.google.android.gms.location.Priority
+import com.google.common.net.MediaType
+import org.json.JSONObject
+import okhttp3.RequestBody
+import okhttp3.OkHttpClient
+import okhttp3.Callback
+
+
 
 
 @AndroidEntryPoint
@@ -78,8 +88,9 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-
     private var isPermissionRequested = false
+    private var latitude: Double = 0.0
+    private var longitude: Double = 0.0
 
 
     companion object {
@@ -200,8 +211,8 @@ class MainActivity : ComponentActivity() {
                     if (location == null) {
                         Toast.makeText(this@MainActivity, "Cannot get location.", Toast.LENGTH_SHORT).show()
                     } else {
-                        val latitude = location.latitude
-                        val longitude = location.longitude
+                        latitude = location.latitude
+                        longitude = location.longitude
                         Log.d("Loc", "Latitude: $latitude, Longitude: $longitude")
                         val locale = getDeviceLocale(this@MainActivity)
                         val lan = locale?.language

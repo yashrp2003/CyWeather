@@ -27,7 +27,7 @@
 */-->
 
 <resources>
-    <string name="app_name">Cyclone Weather</string>
+    <string name="app_name">Météo</string>
     <string name="onboardingHeading1">Choose your favourite food</string>
     <string name="onboardingHeading2">Vaccinated delivery partners</string>
     <string name="onboardingHeading3">Expect Delivery in 20 minutes</string>
@@ -45,8 +45,8 @@
     <string name="display_picture">Display picture</string>
     <string name="log_out">Log Out</string>
     <string name="saved_addresses">Saved Addresses</string>
-    <string name="location_dialog_msg">We would like to provide you the most accurate weather information based on your location. Please provide permission to access the device location.</string>
     <string name="add_edit_and_delete_saved_addresses">Add, edit and delete saved addresses</string>
+    <string name="location_dialog_msg">Nous souhaitons vous fournir les informations météorologiques les plus précises en fonction de votre emplacement. Veuillez fournir l\'autorisation d\'accéder à l\'emplacement de l\'appareil.</string>
     <string name="payments_and_refunds">
 <![CDATA[ Payments & Refunds ]]>
 </string>
