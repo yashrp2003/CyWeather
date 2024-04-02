@@ -1,6 +1,10 @@
 name: AndroidCI
 
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
   push:
     branches:
       - master
