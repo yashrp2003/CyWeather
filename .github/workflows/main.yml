@@ -1,15 +1,15 @@
 name: AndroidCI
 
-on:
+on: 
   workflow_dispatch:
     inputs:
-      environment:
+      branch:
+        description: 'Branch Name'
         required: true
-  push:
-    branches:
-      - master
-    tags:
-      - 'v*'
+        default: 'master'
+        options:
+          - 'master'
+          - 'dev'
 
 jobs:
   build:
