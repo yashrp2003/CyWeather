@@ -35,7 +35,7 @@ jobs:
       - name: Upload APK to GitHub Release
         uses: actions/upload-artifact@v4
         with:
-          path: app/build/outputs/apk/release/app-release.apk
+          path: app/release/app-release.apk
           name: app-release
 
       - name: Build APK
@@ -44,7 +44,7 @@ jobs:
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/release/app-release.aab
+          releaseDirectory: app/release/
           signingKeyBase64: ${{ secrets.KEYSTORE_FILE }}
           alias: ${{ secrets.ALIAS_NAME }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
