@@ -44,7 +44,7 @@ jobs:
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/build/outputs/apk/release
+          releaseDirectory: app/release/app-release.aab
           signingKeyBase64: ${{ secrets.KEYSTORE_FILE }}
           alias: ${{ secrets.ALIAS_NAME }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -56,4 +56,5 @@ jobs:
           appId: ${{secrets.FIREBASE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: testers
-          file: app/build/outputs/apk/release/*.apk
+          file: app/release/app-release.aab
+
