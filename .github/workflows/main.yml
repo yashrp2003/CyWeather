@@ -29,13 +29,10 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
-
       - name: Upload APK to GitHub Release
         uses: actions/upload-artifact@v4
         with:
-          path: app/build/outputs/apk/release/app-release.apk
+          path: app/release/app-release.apk
           name: app-release
 
       - name: Build APK
@@ -44,7 +41,7 @@ jobs:
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/release/app-release.aab
+          releaseDirectory: app/release/app-release.apk
           signingKeyBase64: ${{ secrets.KEYSTORE_FILE }}
           alias: ${{ secrets.ALIAS_NAME }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -56,5 +53,5 @@ jobs:
           appId: ${{secrets.FIREBASE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: testers
-          file: app/release/app-release.aab
+          file: app/release/app-release.apk
 
