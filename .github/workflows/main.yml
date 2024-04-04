@@ -7,6 +7,12 @@ on:
         description: 'Branch Name'
         required: true
         default: 'master'
+      flavor:
+        description: 'Flavor'
+        required: true
+      variant:
+        description: 'Variant'
+        required: true
 
 
 jobs:
@@ -16,6 +22,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Set up JDK
         uses: actions/setup-java@v2
@@ -36,12 +44,12 @@ jobs:
           name: app-release
 
       - name: Build APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew assemble${{ github.event.inputs.flavor }}${{ github.event.inputs.variant }}
 
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/release
+          releaseDirectory: app/${{ github.event.inputs.flavor }}${{ github.event.inputs.variant }}/release
           signingKeyBase64: ${{ secrets.KEYSTORE_FILE }}
           alias: ${{ secrets.ALIAS_NAME }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -55,7 +63,7 @@ jobs:
           appId: ${{secrets.FIREBASE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: testers
-          file: app/release/app-release.apk
+          file: app/${{ github.event.inputs.flavor }}${{ github.event.inputs.variant }}/release/*.apk
 
 
 
