@@ -2,27 +2,7 @@ name: AndroidCI
 
 on:
   workflow_dispatch:
-    inputs:
-      flavor:
-        description: 'Flavor'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - 'Dev'
-          - 'Staging'
-          - 'Prod'
-      variant:
-        description: 'Variant'
-        required: true
-        default: 'Debug'
-        type: choice
-        options:
-          - 'Release'
-          - 'Debug'
-       
-
-
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
