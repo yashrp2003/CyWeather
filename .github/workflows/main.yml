@@ -32,7 +32,7 @@ jobs:
       - name: Upload APK to GitHub Release
         uses: actions/upload-artifact@v4
         with:
-          path: app/release/app-release.apk
+          path: app/build/outputs/apk/release/app-release-unsigned.apk
           name: app-release
 
       - name: Build APK
@@ -41,7 +41,7 @@ jobs:
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/release
+          releaseDirectory: app/build/outputs/apk/release/
           signingKeyBase64: ${{ secrets.KEYSTORE_FILE }}
           alias: ${{ secrets.ALIAS_NAME }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -53,7 +53,7 @@ jobs:
           appId: ${{secrets.FIREBASE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: testers
-          file: app/release/app-release.apk
+          file: app/build/outputs/apk/release/app-release-unsigned.apk
 
 
 
