@@ -74,3 +74,4 @@ jobs:
           file: app/${{ github.event.inputs.flavor }}${{ github.event.inputs.variant }}/release/*.apk
 
 
+
