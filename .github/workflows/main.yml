@@ -3,13 +3,25 @@ name: AndroidCI
 on:
   workflow_dispatch:
     inputs:
-      environment:
+      flavor:
+        description: 'Flavor'
         required: true
-  push:
-    branches:
-      - master
-    tags:
-      - 'v*'
+        default: 'dev'
+        type: choice
+        options:
+          - 'Dev'
+          - 'Staging'
+          - 'Prod'
+      variant:
+        description: 'Variant'
+        required: true
+        default: 'Debug'
+        type: choice
+        options:
+          - 'Release'
+          - 'Debug'
+       
+
 
 jobs:
   build:
@@ -18,6 +30,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Set up JDK
         uses: actions/setup-java@v2
@@ -25,16 +39,38 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
+      - name: Decode Keystore File
+        run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > my-release-key.keystore
+
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease
-
       - name: Upload APK to GitHub Release
         uses: actions/upload-artifact@v4
-        env:
-          GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
         with:
           path: app/release/app-release.apk
           name: app-release
+
+      - name: Build APK
+        run: ./gradlew assemble${{ github.event.inputs.flavor }}${{ github.event.inputs.variant }}
+
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/${{ github.event.inputs.flavor }}${{ github.event.inputs.variant }}/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_FILE }}
+          alias: ${{ secrets.ALIAS_NAME }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ALIAS_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: upload artifact to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{secrets.FIREBASE_APP_ID}}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
+          groups: testers
+          file: app/${{ github.event.inputs.flavor }}${{ github.event.inputs.variant }}/release/*.apk
+
+
