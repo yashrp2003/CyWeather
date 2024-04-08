@@ -10,9 +10,18 @@ on:
       flavor:
         description: 'Flavor'
         required: true
+        default: 'dev'
+        options:
+          - 'Dev'
+          - 'Staging'
+          - 'Prod'
       variant:
         description: 'Variant'
         required: true
+        default: 'Debug'
+        options:
+          - 'Release'
+          - 'Debug'
 
 
 jobs:
