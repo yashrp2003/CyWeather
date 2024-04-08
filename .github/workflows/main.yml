@@ -15,13 +15,13 @@ on:
           - 'Dev'
           - 'Staging'
           - 'Prod'
-      variant:
-        description: 'Variant'
-        required: true
-        default: 'Debug'
+      choice:
+        type: choice
+        description: Make a choice
         options:
-          - 'Release'
-          - 'Debug'
+        - foo
+        - bar
+        - baz
 
 
 jobs:
