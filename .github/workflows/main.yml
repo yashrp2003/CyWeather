@@ -7,7 +7,7 @@ on:
         description: 'Branch Name'
         required: true
         default: 'master'
-            flavor:
+      flavor:
         description: 'Flavor'
         required: true
         default: 'dev'
