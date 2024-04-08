@@ -7,20 +7,21 @@ on:
         description: 'Branch Name'
         required: true
         default: 'master'
-      flavor:
-        type: choice
+            flavor:
         description: 'Flavor'
         required: true
         default: 'dev'
-         options:
-        - foo
-        - bar
-        - baz
+        options:
+          - 'Dev'
+          - 'Staging'
+          - 'Prod'
       variant:
         description: 'Variant'
         required: true
         default: 'Debug'
-        choices: ['Release', 'Debug']
+        options:
+          - 'Release'
+          - 'Debug'
 
 
 jobs:
