@@ -11,17 +11,20 @@ on:
         description: 'Flavor'
         required: true
         default: 'dev'
+        type: choice
         options:
           - 'Dev'
           - 'Staging'
           - 'Prod'
-      choice:
+      variant:
+        description: 'Variant'
+        required: true
+        default: 'Debug'
         type: choice
-        description: Make a choice
         options:
-        - foo
-        - bar
-        - baz
+          - 'Release'
+          - 'Debug'
+       
 
 
 jobs:
