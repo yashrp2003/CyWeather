@@ -3,10 +3,6 @@ name: AndroidCI
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: 'Branch Name'
-        required: true
-        default: 'master'
       flavor:
         description: 'Flavor'
         required: true
