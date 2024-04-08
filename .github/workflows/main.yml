@@ -52,12 +52,12 @@ jobs:
           name: app-release
 
       - name: Build APK
-        run: ./gradlew assemble${{ github.event.inputs.flavor }}${{ github.event.inputs.variant }}
+        run: ./gradlew assembleRelease
 
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/${{ github.event.inputs.flavor }}${{ github.event.inputs.variant }}/release
+          releaseDirectory: app/release
           signingKeyBase64: ${{ secrets.KEYSTORE_FILE }}
           alias: ${{ secrets.ALIAS_NAME }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -71,6 +71,6 @@ jobs:
           appId: ${{secrets.FIREBASE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: testers
-          file: app/${{ github.event.inputs.flavor }}${{ github.event.inputs.variant }}/release/*.apk
+          file: app/release/app-release.apk
 
 
