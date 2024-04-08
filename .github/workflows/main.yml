@@ -8,20 +8,19 @@ on:
         required: true
         default: 'master'
       flavor:
+        type: choice
         description: 'Flavor'
         required: true
         default: 'dev'
-        options:
-          - 'Dev'
-          - 'Staging'
-          - 'Prod'
+         options:
+        - foo
+        - bar
+        - baz
       variant:
         description: 'Variant'
         required: true
         default: 'Debug'
-        options:
-          - 'Release'
-          - 'Debug'
+        choices: ['Release', 'Debug']
 
 
 jobs:
